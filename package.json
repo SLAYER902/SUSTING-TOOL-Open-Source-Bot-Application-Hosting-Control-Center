@@ -9,6 +9,7 @@
     "start": "npm run start -w @sulayer/web",
     "worker": "npm run start -w @sulayer/worker",
     "db:generate": "prisma generate --schema packages/database/prisma/schema.prisma",
+    "db:deploy": "prisma migrate deploy --schema packages/database/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema packages/database/prisma/schema.prisma",
     "db:push": "prisma db push --schema packages/database/prisma/schema.prisma",
     "test": "vitest run",

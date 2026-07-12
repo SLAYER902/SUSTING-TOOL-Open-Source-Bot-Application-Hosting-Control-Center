@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies, headers } from "next/headers";
 import { Prisma } from "@prisma/client";
+import { assertAuthenticationEnvironment } from "@/lib/env.mjs";
 import { prisma } from "@/lib/prisma";
 import { validatePassword } from "@/lib/security";
 
@@ -19,16 +20,26 @@ function sessionKey() {
 function hash(value: string) { return createHash("sha256").update(value).digest("hex"); }
 
 export async function ensureInitialAdmin() {
-  const count = await prisma.user.count();
-  if (count > 0) return;
-  const username = process.env.ADMIN_USERNAME;
-  const password = process.env.ADMIN_PASSWORD;
-  if (!username || !password) throw new Error("ADMIN_USERNAME and ADMIN_PASSWORD are required for first startup.");
-  const weakness = validatePassword(password);
-  if (weakness) throw new Error(`ADMIN_PASSWORD is too weak: ${weakness}`);
-  await prisma.user.create({
-    data: { username, email: process.env.ADMIN_EMAIL || null, passwordHash: await argon2.hash(password, { type: argon2.argon2id }), role: "OWNER" }
-  });
+  const environment = assertAuthenticationEnvironment();
+  const username = environment.ADMIN_USERNAME.trim();
+  const existingUser = await prisma.user.findUnique({ where: { username } });
+  if (existingUser) return;
+  const weakness = validatePassword(environment.ADMIN_PASSWORD);
+  if (weakness) throw new Error("Invalid environment variables: ADMIN_PASSWORD");
+
+  try {
+    await prisma.user.create({
+      data: {
+        username,
+        email: process.env.ADMIN_EMAIL || null,
+        passwordHash: await argon2.hash(environment.ADMIN_PASSWORD, { type: argon2.argon2id }),
+        role: "OWNER",
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return;
+    throw error;
+  }
 }
 
 export function rateLimit(request: Request) {
