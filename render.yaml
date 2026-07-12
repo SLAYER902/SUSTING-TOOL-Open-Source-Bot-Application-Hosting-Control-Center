@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: sulayer-control-plane
+    runtime: docker
+    dockerfilePath: ./docker/control-plane/Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sulayer-postgres
+          property: connectionString
+      - key: REDIS_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: RUNNER_SHARED_SECRET
+        generateValue: true
+  - type: worker
+    name: sulayer-runner
+    runtime: docker
+    dockerfilePath: ./docker/worker/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sulayer-postgres
+          property: connectionString
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: RUNNER_SHARED_SECRET
+        sync: false
+databases:
+  - name: sulayer-postgres
+    databaseName: sulayer
+    user: sulayer

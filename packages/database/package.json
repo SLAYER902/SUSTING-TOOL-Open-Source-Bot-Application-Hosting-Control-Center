@@ -1,0 +1,6 @@
+{
+  "name": "@sulayer/database",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./prisma/schema.prisma"
+}
