@@ -57,7 +57,7 @@ Review generated commands before deploying. An existing repository `Dockerfile` 
 Requirements: Docker Engine/Compose, a host where you are authorized to run containers, and at least 2 GB RAM for the panel services (plus capacity for project workloads).
 
 ```bash
-git clone https://github.com/USERNAME/sulayer-cloud-panel.git
+[git clone https://github.com/USERNAME/sulayer-cloud-panel.git](https://github.com/SLAYER902/SUSTING-TOOL-Open-Source-Bot-Application-Hosting-Control-Center.git)
 cd sulayer-cloud-panel
 cp .env.example .env
 ```
