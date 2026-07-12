@@ -2,6 +2,7 @@ import argon2 from "argon2";
 import { createHash, randomUUID } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies, headers } from "next/headers";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { validatePassword } from "@/lib/security";
 
@@ -87,6 +88,20 @@ export async function destroySession() {
   jar.delete(cookieName);
 }
 
-export async function audit(userId: string | null, action: string, entityType: string, entityId?: string, metadata?: Record<string, unknown>) {
-  await prisma.auditLog.create({ data: { userId, action, entityType, entityId, metadata } });
+export async function audit(
+  userId: string | null,
+  action: string,
+  entityType: string,
+  entityId?: string,
+  metadata?: Prisma.InputJsonObject,
+) {
+  const data: Prisma.AuditLogUncheckedCreateInput = {
+    userId,
+    action,
+    entityType,
+    ...(entityId !== undefined ? { entityId } : {}),
+    ...(metadata !== undefined ? { metadata } : {}),
+  };
+
+  await prisma.auditLog.create({ data });
 }
