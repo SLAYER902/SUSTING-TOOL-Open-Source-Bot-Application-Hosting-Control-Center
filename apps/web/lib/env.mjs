@@ -1,14 +1,11 @@
 import { z } from "zod";
 
 const requiredString = z.string().trim().min(1);
-const productionEnvironment = z.object({
+const authenticationEnvironment = z.object({
   DATABASE_URL: requiredString,
   ADMIN_USERNAME: requiredString,
   ADMIN_PASSWORD: requiredString,
   SESSION_SECRET: z.string().min(32),
-  APP_URL: z.string().url(),
-});
-const developmentEnvironment = productionEnvironment.extend({
   APP_URL: z.string().url().optional(),
 });
 
@@ -31,10 +28,7 @@ function formatEnvironmentError(error) {
 }
 
 export function assertAuthenticationEnvironment() {
-  const schema = process.env.NODE_ENV === "production"
-    ? productionEnvironment
-    : developmentEnvironment;
-  const result = schema.safeParse(process.env);
+  const result = authenticationEnvironment.safeParse(process.env);
 
   if (!result.success) throw new Error(formatEnvironmentError(result.error));
 
