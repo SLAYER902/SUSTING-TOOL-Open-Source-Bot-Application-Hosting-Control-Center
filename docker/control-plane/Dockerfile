@@ -15,7 +15,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/web/.next ./apps/web/.next
 COPY --from=build /app/apps/web/public ./apps/web/public
 COPY --from=build /app/apps/web/package.json ./apps/web/package.json
+COPY --from=build /app/apps/web/scripts ./apps/web/scripts
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/packages/database/prisma ./packages/database/prisma
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma db push --schema packages/database/prisma/schema.prisma && npm run start -w @sulayer/web"]
+CMD ["sh", "-c", "npx prisma db push --schema packages/database/prisma/schema.prisma && exec npm run start -w @sulayer/web"]
